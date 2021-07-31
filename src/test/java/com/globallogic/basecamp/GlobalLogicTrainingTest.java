@@ -112,7 +112,7 @@ class GlobalLogicTrainingTest {
     }
 
     @Test
-    void tesRateFirstSemesterWithWrongGrade() throws ReflectiveOperationException {
+    void testRateFirstSemesterWithWrongGrade() throws ReflectiveOperationException {
         final var training = new GlobalLogicTraining("Java Camp");
         final var student1 = Student.builder("jerry.ferdy@email.com").build();
         final var student2 = Student.builder("amanda.perry@email.com").build();
@@ -152,7 +152,7 @@ class GlobalLogicTrainingTest {
     }
 
     @Test
-    void tesRateSecondSemesterWithWrongGrade() throws ReflectiveOperationException {
+    void testRateSecondSemesterWithWrongGrade() throws ReflectiveOperationException {
         final var training = new GlobalLogicTraining("Java Camp");
         final var student1 = Student.builder("jerry.ferdy@email.com").build();
         final var student2 = Student.builder("amanda.perry@email.com").build();

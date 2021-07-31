@@ -1,12 +1,19 @@
 package com.globallogic.basecamp;
 
+import com.globallogic.basecamp.comparator.StudentComparator;
 import com.globallogic.basecamp.model.Grade;
 import com.globallogic.basecamp.model.Student;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -32,7 +39,14 @@ public class TrainingUtils {
      */
     public static List<String> getStudentEmailsByCondition(Stream<Training> trainings,
                                                            Predicate<Student> predicate) {
-
+        return trainings
+                .flatMap(training -> training.getStudents().stream())
+                .sorted(new StudentComparator())
+                .collect(Collectors.toCollection(LinkedHashSet::new))
+                .stream()
+                .filter(predicate)
+                .map(Student::getEmail)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -42,7 +56,18 @@ public class TrainingUtils {
      * @return map where keys are student emails and values are List of training names that this student attends
      */
     public static Map<String, List<String>> getTrainingsPerStudent(Stream<Training> trainings) {
-
+        Map<String, List<String>> trainingsPerStudent = new HashMap<>();
+        trainings.forEach(training -> {
+            List<Student> students = training.getStudents();
+            for (Student student : students) {
+                List<String> trainingsForThisStudent = trainingsPerStudent.containsKey(student.getEmail())
+                        ? trainingsPerStudent.get(student.getEmail())
+                        : new ArrayList<>();
+                trainingsForThisStudent.add(training.getName());
+                trainingsPerStudent.put(student.getEmail(), trainingsForThisStudent);
+            }
+        });
+        return trainingsPerStudent;
     }
 
     /**
@@ -53,7 +78,26 @@ public class TrainingUtils {
      * @return map where keys are student emails and values are student average mark calculating using both semesters
      */
     public static Map<String, Double> getAverageMarkPerStudent(Stream<Training> trainings) {
-
+        Map<String, Double> averageMarkPerStudent = new HashMap<>();
+        List<Training> allTrainings = trainings.collect(Collectors.toList());
+        allTrainings.stream().flatMap(training -> training.getStudents().stream())
+                .forEach(student -> {
+                    List<Integer> grades = new ArrayList<>();
+                    if (!averageMarkPerStudent.containsKey(student.getEmail())) {
+                        averageMarkPerStudent.put(student.getEmail(), null);
+                        allTrainings.stream()
+                                .filter(trainingsInSecondLoop -> trainingsInSecondLoop.getStudentGrade(student).isPresent())
+                                .forEach(trainingsInSecondLoop -> {
+                                    grades.add(trainingsInSecondLoop.getStudentGrade(student).get().getFirstSemester());
+                                    grades.add(trainingsInSecondLoop.getStudentGrade(student).get().getSecondSemester());
+                                });
+                        Double avg = grades.stream()
+                                .mapToInt(i -> i)
+                                .average().orElse(Double.NaN);
+                        averageMarkPerStudent.put(student.getEmail(), avg);
+                    }
+                });
+        return averageMarkPerStudent;
     }
 
     /**
@@ -63,7 +107,10 @@ public class TrainingUtils {
      * @param action    action to perform
      */
     public static void forEachGrade(Stream<Training> trainings, Consumer<Grade> action) {
-
+        trainings.forEach(training -> training.getStudents().stream()
+                .filter(student -> training.getStudentGrade(student).isPresent())
+                .map(student -> training.getStudentGrade(student).get())
+                .forEach(action));
     }
 
     /**
@@ -73,7 +120,28 @@ public class TrainingUtils {
      * @return list of students emails
      */
     public static List<String> getStudentsWithMaxMark(Stream<Training> trainings) {
+        List<String> studentsWithMaxMarks = new ArrayList<>();
+        trainings.forEach(training -> {
+            Student maxStudent = null;
+            int max = Integer.MIN_VALUE;
 
+            for (Student student : training.getStudents()) {
+                if (training.getStudentGrade(student).isPresent()) {
+                    int firstSemesterMark = training.getStudentGrade(student).get().getFirstSemester();
+                    if (firstSemesterMark > max) {
+                        max = firstSemesterMark;
+                        maxStudent = student;
+                    }
+                    int secondSemesterMark = training.getStudentGrade(student).get().getSecondSemester();
+                    if (secondSemesterMark > max) {
+                        max = secondSemesterMark;
+                        maxStudent = student;
+                    }
+                }
+            }
+            studentsWithMaxMarks.add(maxStudent.getEmail());
+        });
+        return studentsWithMaxMarks;
     }
 
     /**
@@ -83,7 +151,9 @@ public class TrainingUtils {
      * @param predicate condition whether to remove a student
      */
     public static void removeStudentsIf(Stream<Training> trainings, Predicate<Student> predicate) {
-
+        trainings.forEach(training -> training.getStudents().stream()
+                .filter(predicate)
+                .forEach(training::removeStudent));
     }
 
     /**
@@ -96,7 +166,13 @@ public class TrainingUtils {
      * @return list of sorted
      */
     public static List<String> getStudentsSorted(Stream<Training> trainings) {
-
+        return trainings
+                .flatMap(training -> training.getStudents().stream())
+                .sorted(new StudentComparator())
+                .collect(Collectors.toCollection(LinkedHashSet::new))
+                .stream()
+                .map(student -> String.join("", student.getFirstName(), " ", student.getLastName()))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -108,7 +184,16 @@ public class TrainingUtils {
      * @return list of students' emails
      */
     public static List<String> getStudentsWithMarkLowerThan(Stream<Training> trainings, int mark) {
-
+        Set<String> studentsWithLowerMarks = new HashSet<>();
+        trainings.forEach(training -> training.getStudents().stream()
+                .filter(student -> training.getStudentGrade(student).isPresent())
+                .forEach(student -> {
+                    addStudentIfThereIsLowerMark(studentsWithLowerMarks, mark, student,
+                            training.getStudentGrade(student).get().getFirstSemester());
+                    addStudentIfThereIsLowerMark(studentsWithLowerMarks, mark, student,
+                            training.getStudentGrade(student).get().getSecondSemester());
+                }));
+        return new ArrayList<>(studentsWithLowerMarks);
     }
 
     /**
@@ -120,7 +205,9 @@ public class TrainingUtils {
      * @return true if the student attends any training, false otherwise
      */
     public static boolean isStudentPresentOnTrainings(Stream<Training> trainings, Student student) {
-
+        return trainings
+                .flatMap(training -> training.getStudents().stream())
+                .anyMatch(studentOnTraining -> studentOnTraining.getEmail().equals(student.getEmail()));
     }
 
     /**
@@ -130,8 +217,30 @@ public class TrainingUtils {
      * @param trainings stream of trainings
      * @return map where key is a training name and value is an average mark
      */
+    //Stream done
     public static Map<String, Double> getAverageMarkPerTraining(Stream<Training> trainings) {
+        Map<String, Double> averageMarkPerTraining = new HashMap<>();
+        trainings.forEach(training -> {
+            averageMarkPerTraining.put(training.getName(), null);
+            List<Integer> grades = new ArrayList<>();
+            training.getStudents().stream()
+                    .filter(student -> training.getStudentGrade(student).isPresent())
+                    .forEach(student -> {
+                        grades.add(training.getStudentGrade(student).get().getFirstSemester());
+                        grades.add(training.getStudentGrade(student).get().getSecondSemester());
+                    });
+            Double avg = grades.stream()
+                    .mapToInt(i -> i)
+                    .average().orElse(Double.NaN);
+            averageMarkPerTraining.put(training.getName(), avg);
+        });
+        return averageMarkPerTraining;
+    }
 
+    private static void addStudentIfThereIsLowerMark(Set<String> studentsWithLowerMarks, int mark, Student student, int semesterMark) {
+        if (semesterMark < mark) {
+            studentsWithLowerMarks.add(student.getEmail());
+        }
     }
 
 }

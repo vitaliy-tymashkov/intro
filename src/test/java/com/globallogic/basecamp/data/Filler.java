@@ -67,5 +67,4 @@ public class Filler {
                 .setPhoneNumber("00-000-00-03").build();
         return List.of(student1, student2, student3, student4);
     }
-
 }

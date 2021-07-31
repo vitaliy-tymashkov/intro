@@ -5,17 +5,24 @@ package com.globallogic.basecamp.model;
  */
 public class Address {
 
-    private final String country;
+    private String country;
 
-    private final String city;
+    private String city;
 
-    private final String street;
+    private String street;
 
-    private final Integer houseNumber;
+    private Integer houseNumber;
 
     /**
-     * TODO: implement getters and other methods if necessary
+     * TODOx - done: implement getters and other methods if necessary
      */
+    public String getCountry() {
+        return country;
+    }
+
+    public String getCity() {
+        return city;
+    }
 
     /**
      * Allows to get the builder for the Address
@@ -23,16 +30,45 @@ public class Address {
      * @return builder
      */
     public static Builder builder() {
-        
+        return new Builder();
     }
 
     /**
      * Builder class is a part of the builder pattern implementation
      * Needed to ease the Address object construction
      * <p>
-     * TODO: implement the builder functionality
+     * TODOx - done: implement the builder functionality
      */
-    public class Builder {
+    public static class Builder {
+        private final Address newAddress;
+
+        public Builder(){
+            newAddress = new Address();
+        }
+
+        public Builder setCountry(String country) {
+            newAddress.country = country;
+            return this;
+        }
+
+        public Builder setCity(String city) {
+            newAddress.city = city;
+            return this;
+        }
+
+        public Builder setStreet(String street) {
+            newAddress.street = street;
+            return this;
+        }
+
+        public Builder setHouseNumber(Integer houseNumber) {
+            newAddress.houseNumber = houseNumber;
+            return this;
+        }
+
+        public Address build() {
+            return newAddress;
+        }
     }
 
 }

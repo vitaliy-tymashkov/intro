@@ -10,9 +10,15 @@ import java.util.Comparator;
 public class StudentComparator implements Comparator<Student> {
 
     /**
-     * TODO: implement `compare` method of the Comparator interface
+     * TODOx - done: implement `compare` method of the Comparator interface
      * Compare students in natural order by the last name. If last names are the same,
      * compare in natural order by the first name
      */
+    @Override
+    public int compare(Student o1, Student o2) {
+        return Comparator.comparing(Student::getLastName)
+                .thenComparing(Student::getFirstName)
+                .compare(o1, o2);
+    }
 
 }
