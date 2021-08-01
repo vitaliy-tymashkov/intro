@@ -57,16 +57,14 @@ public class TrainingUtils {
      */
     public static Map<String, List<String>> getTrainingsPerStudent(Stream<Training> trainings) {
         Map<String, List<String>> trainingsPerStudent = new HashMap<>();
-        trainings.forEach(training -> {
-            List<Student> students = training.getStudents();
-            for (Student student : students) {
-                List<String> trainingsForThisStudent = trainingsPerStudent.containsKey(student.getEmail())
-                        ? trainingsPerStudent.get(student.getEmail())
-                        : new ArrayList<>();
-                trainingsForThisStudent.add(training.getName());
-                trainingsPerStudent.put(student.getEmail(), trainingsForThisStudent);
-            }
-        });
+        trainings.forEach(training -> training.getStudents()
+                .forEach(student -> {
+                    List<String> trainingsForThisStudent = trainingsPerStudent.containsKey(student.getEmail())
+                            ? trainingsPerStudent.get(student.getEmail())
+                            : new ArrayList<>();
+                    trainingsForThisStudent.add(training.getName());
+                    trainingsPerStudent.put(student.getEmail(), trainingsForThisStudent);
+                }));
         return trainingsPerStudent;
     }
 
