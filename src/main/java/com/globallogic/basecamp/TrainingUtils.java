@@ -170,7 +170,7 @@ public class TrainingUtils {
                 .sorted(new StudentComparator())
                 .collect(Collectors.toCollection(LinkedHashSet::new))
                 .stream()
-                .map(student -> String.join("", student.getFirstName(), " ", student.getLastName()))
+                .map(TrainingUtils::getStudentFullName)
                 .collect(Collectors.toList());
     }
 
@@ -240,6 +240,10 @@ public class TrainingUtils {
         if (semesterMark < mark) {
             studentsWithLowerMarks.add(student.getEmail());
         }
+    }
+
+    private static String getStudentFullName(Student student) {
+        return String.join("", student.getFirstName(), " ", student.getLastName());
     }
 
 }
