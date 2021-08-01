@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -137,7 +138,7 @@ public class TrainingUtils {
                     }
                 }
             }
-            studentsWithMaxMarks.add(maxStudent.getEmail());
+            studentsWithMaxMarks.add(Objects.requireNonNull(maxStudent).getEmail());
         });
         return studentsWithMaxMarks;
     }
