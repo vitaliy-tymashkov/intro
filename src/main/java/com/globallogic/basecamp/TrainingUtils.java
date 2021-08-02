@@ -5,6 +5,8 @@ import com.globallogic.basecamp.model.Grade;
 import com.globallogic.basecamp.model.Student;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -14,6 +16,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -216,7 +220,6 @@ public class TrainingUtils {
      * @param trainings stream of trainings
      * @return map where key is a training name and value is an average mark
      */
-    //Stream done
     public static Map<String, Double> getAverageMarkPerTraining(Stream<Training> trainings) {
         Map<String, Double> averageMarkPerTraining = new HashMap<>();
         trainings.forEach(training -> {
