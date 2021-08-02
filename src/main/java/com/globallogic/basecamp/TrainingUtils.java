@@ -1,25 +1,22 @@
 package com.globallogic.basecamp;
 
-import com.globallogic.basecamp.comparator.StudentComparator;
-import com.globallogic.basecamp.model.Grade;
-import com.globallogic.basecamp.model.Student;
+import static com.globallogic.basecamp.GlobalLogicTraining.HIGHEST_MARK;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import com.globallogic.basecamp.comparator.StudentComparator;
+import com.globallogic.basecamp.model.Grade;
+import com.globallogic.basecamp.model.Student;
 
 /**
  * TrainingUtils contains a set of operations to perform with Stream of trainings.
@@ -124,26 +121,9 @@ public class TrainingUtils {
      */
     public static List<String> getStudentsWithMaxMark(Stream<Training> trainings) {
         List<String> studentsWithMaxMarks = new ArrayList<>();
-        trainings.forEach(training -> {
-            Student maxStudent = null;
-            int max = Integer.MIN_VALUE;
-
-            for (Student student : training.getStudents()) {
-                if (training.getStudentGrade(student).isPresent()) {
-                    int firstSemesterMark = training.getStudentGrade(student).get().getFirstSemester();
-                    if (firstSemesterMark > max) {
-                        max = firstSemesterMark;
-                        maxStudent = student;
-                    }
-                    int secondSemesterMark = training.getStudentGrade(student).get().getSecondSemester();
-                    if (secondSemesterMark > max) {
-                        max = secondSemesterMark;
-                        maxStudent = student;
-                    }
-                }
-            }
-            studentsWithMaxMarks.add(Objects.requireNonNull(maxStudent).getEmail());
-        });
+        trainings.forEach(training -> training.getStudents().stream()
+                .filter(student -> training.getStudentGrade(student).isPresent())
+                .forEach(student -> checkIfStudentHasMaxMarkInAnySemesterAndAddToList(studentsWithMaxMarks, training, student)));
         return studentsWithMaxMarks;
     }
 
@@ -247,6 +227,14 @@ public class TrainingUtils {
 
     private static String getStudentFullName(Student student) {
         return String.join("", student.getFirstName(), " ", student.getLastName());
+    }
+
+    private static void checkIfStudentHasMaxMarkInAnySemesterAndAddToList(List<String> studentsWithMaxMarks,
+                                                                          Training training, Student student) {
+        if (training.getStudentGrade(student).get().getFirstSemester() == HIGHEST_MARK
+                || training.getStudentGrade(student).get().getSecondSemester() == HIGHEST_MARK) {
+            studentsWithMaxMarks.add(student.getEmail());
+        }
     }
 
 }

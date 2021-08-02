@@ -68,8 +68,7 @@ class TrainingUtilsTest {
     @Test
     void testGetStudentsWithMaxMark() {
         final var result = TrainingUtils.getStudentsWithMaxMark(trainings.stream());
-//        testListsEqual(result, List.of("amanda.perry@email.com", "rob.johnson@email.com")); //NOTE: 3 trainings - why only 2 max marks?
-        testListsEqual(List.of("jerry.ferdy@email.com", "amanda.perry@email.com", "rob.johnson@email.com"), result);  //NOTE Fixed order - reversed!
+        testListsEqual(List.of("amanda.perry@email.com", "rob.johnson@email.com"), result); //NOTE Fixed order - reversed!
     }
 
     @Test

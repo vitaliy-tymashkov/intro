@@ -19,7 +19,7 @@ public class GlobalLogicTraining implements Training {
      */
 
     private static final int LOWEST_MARK = 0;
-    private static final int HIGHEST_MARK = 10;
+    static final int HIGHEST_MARK = 10;
 
     private final String name;
 
